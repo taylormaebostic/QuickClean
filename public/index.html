@@ -4,33 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>QuickClean - 5 Minute Cleaning Tasks</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4ecca3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg: #1a1a2e;
-            --card: #16213e;
-            --accent: #0f3460;
-            --mint: #4ecca3;
-            --coral: #ff6b6b;
-            --yellow: #ffd93d;
-            --white: #fff;
-            --gray: #a0a0a0;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--white);
-            min-height: 100vh;
-        }
-        .auth-screen {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        :root { --bg: #1a1a2e; --card: #16213e; --accent: #0f3460; --mint: #4ecca3; --coral: #ff6b6b; --yellow: #ffd93d; --white: #fff; --gray: #a0a0a0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+        .auth-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .auth-logo { font-size: 80px; margin-bottom: 10px; }
         .auth-title { font-size: 36px; font-weight: 800; color: var(--mint); margin-bottom: 5px; }
         .auth-subtitle { color: var(--gray); margin-bottom: 30px; }
@@ -186,6 +169,12 @@
         async function completeTask() { clearInterval(timerInterval); try { await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ title: currentTask.title, category: 'completed', steps: currentTask.steps }) }); } catch (e) {} document.getElementById('celebration').classList.add('show'); }
         function closeCelebration() { document.getElementById('celebration').classList.remove('show'); cancelTask(); loadHistory(); }
         async function loadHistory() { try { const res = await fetch('/api/tasks', { headers: { 'Authorization': 'Bearer ' + token } }); const tasks = await res.json(); const list = document.getElementById('historyList'); if (tasks.length === 0) { list.innerHTML = '<p style="color: var(--gray); text-align: center;">No tasks yet. Start your first one above!</p>'; return; } list.innerHTML = tasks.slice(0, 10).map(t => `<div class="history-item completed"><div><div class="history-title">${t.title}</div><div class="history-meta">${new Date(t.createdAt).toLocaleDateString()} • ${t.steps.length} steps</div></div><div class="history-badge">✓ Done</div></div>`).join(''); } catch (e) {} }
+        
+        // PWA Install
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; showInstallButton(); });
+        function showInstallButton() { const btn = document.createElement('button'); btn.innerHTML = '📲 Install App'; btn.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#4ecca3;color:#1a1a2e;border:none;padding:12px 20px;border-radius:25px;font-weight:bold;cursor:pointer;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);'; btn.onclick = async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') btn.remove(); deferredPrompt = null; } }; document.body.appendChild(btn); }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
