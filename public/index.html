@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuickClean - 5 Minute Cleaning Tasks</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --accent: #0f3460;
+            --mint: #4ecca3;
+            --coral: #ff6b6b;
+            --yellow: #ffd93d;
+            --white: #fff;
+            --gray: #a0a0a0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--white);
+            min-height: 100vh;
+        }
+        .auth-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-logo { font-size: 80px; margin-bottom: 10px; }
+        .auth-title { font-size: 36px; font-weight: 800; color: var(--mint); margin-bottom: 5px; }
+        .auth-subtitle { color: var(--gray); margin-bottom: 30px; }
+        .auth-box { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; }
+        .tabs { display: flex; background: var(--accent); border-radius: 10px; padding: 4px; margin-bottom: 25px; }
+        .tab { flex: 1; padding: 12px; border: none; background: transparent; color: var(--gray); font-weight: 600; cursor: pointer; border-radius: 8px; }
+        .tab.active { background: var(--mint); color: var(--bg); }
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; margin-bottom: 6px; color: var(--gray); font-size: 14px; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 14px; border: 2px solid var(--accent); border-radius: 10px; background: var(--bg); color: var(--white); font-size: 16px; }
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--mint); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-mint { background: var(--mint); color: var(--bg); }
+        .btn-coral { background: var(--coral); color: var(--white); }
+        .error-msg { background: rgba(255,107,107,0.2); color: var(--coral); padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; display: none; }
+        .dashboard { display: none; }
+        .header { background: var(--card); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .header-logo { font-size: 28px; }
+        .header-title { font-size: 20px; font-weight: 700; color: var(--mint); }
+        .header-user { color: var(--gray); font-size: 14px; }
+        .logout-btn { background: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; color: var(--white); cursor: pointer; }
+        .logout-btn:hover { background: var(--coral); }
+        .main { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .templates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 30px; }
+        .template-card { background: var(--card); padding: 20px 15px; border-radius: 14px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; }
+        .template-card:hover { border-color: var(--mint); transform: translateY(-3px); }
+        .template-icon { font-size: 36px; margin-bottom: 8px; }
+        .template-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .template-time { font-size: 12px; color: var(--gray); }
+        .ai-section { background: var(--card); padding: 20px; border-radius: 16px; margin-bottom: 30px; }
+        .ai-input-row { display: flex; gap: 10px; }
+        .ai-input-row input { flex: 1; }
+        .ai-input-row .btn { width: auto; padding: 14px 24px; }
+        .active-task { background: linear-gradient(135deg, var(--card), var(--accent)); padding: 25px; border-radius: 20px; margin-bottom: 30px; display: none; }
+        .task-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; }
+        .task-title { font-size: 22px; font-weight: 700; }
+        .task-timer { background: var(--mint); color: var(--bg); padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 18px; }
+        .task-progress { margin-bottom: 20px; }
+        .progress-bar { background: var(--bg); border-radius: 10px; height: 12px; overflow: hidden; }
+        .progress-fill { background: var(--mint); height: 100%; transition: width 0.3s; }
+        .progress-text { text-align: center; margin-top: 8px; color: var(--gray); font-size: 14px; }
+        .steps-list { display: flex; flex-direction: column; gap: 12px; }
+        .step-item { background: var(--bg); padding: 16px; border-radius: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.3s; }
+        .step-item:hover { background: var(--accent); }
+        .step-item.completed { opacity: 0.6; }
+        .step-item.completed .step-text { text-decoration: line-through; }
+        .step-checkbox { width: 28px; height: 28px; border: 3px solid var(--mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .step-item.completed .step-checkbox { background: var(--mint); color: var(--bg); }
+        .step-text { flex: 1; font-size: 16px; }
+        .step-time { color: var(--gray); font-size: 14px; }
+        .task-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .task-actions .btn { flex: 1; }
+        .celebration { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; flex-direction: column; z-index: 1000; }
+        .celebration.show { display: flex; }
+        .celebration-emoji { font-size: 100px; animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce { to { transform: translateY(-20px); } }
+        .celebration-text { font-size: 32px; font-weight: 700; color: var(--mint); margin: 20px 0; }
+        .celebration-sub { color: var(--gray); margin-bottom: 30px; }
+        .history-section { margin-top: 30px; }
+        .history-item { background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .history-item.completed { border-left: 4px solid var(--mint); }
+        .history-title { font-weight: 600; }
+        .history-meta { color: var(--gray); font-size: 13px; margin-top: 4px; }
+        .history-badge { background: var(--mint); color: var(--bg); padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .loading { display: none; text-align: center; padding: 40px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--accent); border-top-color: var(--mint); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 600px) { .templates-grid { grid-template-columns: repeat(3, 1fr); } .ai-input-row { flex-direction: column; } .ai-input-row .btn { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-logo">🧹</div>
+        <h1 class="auth-title">QuickClean</h1>
+        <p class="auth-subtitle">5-Minute Cleaning Tasks Made Simple</p>
+        <div class="auth-box">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('login')">Login</button>
+                <button class="tab" onclick="showTab('register')">Sign Up</button>
+            </div>
+            <div class="error-msg" id="authError"></div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com" required></div>
+                <div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
+                <button type="submit" class="btn btn-mint">Login</button>
+            </form>
+            <form id="registerForm" style="display:none" onsubmit="handleRegister(event)">
+                <div class="input-group"><label>Name</label><input type="text" id="regName" placeholder="Your Name" required></div>
+                <div class="input-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com" required></div>
+                <div class="input-group"><label>Password</label><input type="password" id="regPassword" placeholder="••••••••" minlength="6" required></div>
+                <button type="submit" class="btn btn-mint">Create Account</button>
+            </form>
+        </div>
+    </div>
+    <div class="dashboard" id="dashboard">
+        <header class="header">
+            <div class="header-left"><span class="header-logo">🧹</span><span class="header-title">QuickClean</span></div>
+            <div><span class="header-user" id="userName"></span><button class="logout-btn" onclick="logout()">Logout</button></div>
+        </header>
+        <div class="main">
+            <div class="active-task" id="activeTask">
+                <div class="task-header"><div class="task-title" id="taskTitle">Kitchen Clean</div><div class="task-timer" id="taskTimer">5:00</div></div>
+                <div class="task-progress"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div class="progress-text" id="progressText">0 of 5 steps done</div></div>
+                <div class="steps-list" id="stepsList"></div>
+                <div class="task-actions"><button class="btn btn-coral" onclick="cancelTask()">Cancel</button></div>
+            </div>
+            <div id="templatesSection">
+                <h2 class="section-title">⚡ Quick Start</h2>
+                <div class="templates-grid" id="templatesGrid">
+                    <div class="template-card" onclick="startTemplate('kitchen')"><div class="template-icon">🍳</div><div class="template-name">Kitchen</div><div class="template-time">5 min</div></div>
+                    <div class="template-card" onclick="startTemplate('bathroom')"><div class="template-icon">🚿</div><div class="template-name">Bathroom</div><div class="template-time">5 min</div></div>
+                    <div class="template-card" onclick="startTemplate('bedroom')"><div class="template-icon">🛏️</div><div class="template-name">Bedroom</div><div class="template-time">5 min</div></div>
+                    <div class="template-card" onclick="startTemplate('livingroom')"><div class="template-icon">🛋️</div><div class="template-name">Living Room</div><div class="template-time">5 min</div></div>
+                    <div class="template-card" onclick="startTemplate('desk')"><div class="template-icon">💻</div><div class="template-name">Desk</div><div class="template-time">5 min</div></div>
+                    <div class="template-card" onclick="startTemplate('car')"><div class="template-icon">🚗</div><div class="template-name">Car</div><div class="template-time">5 min</div></div>
+                </div>
+                <h2 class="section-title">🤖 AI Task Breakdown</h2>
+                <div class="ai-section">
+                    <p style="color: var(--gray); margin-bottom: 15px; font-size: 14px;">Enter any cleaning task and AI will break it down into simple steps!</p>
+                    <div class="ai-input-row"><input type="text" id="aiTaskInput" placeholder="e.g., Clean out the garage, Organize closet..."><button class="btn btn-mint" onclick="aiBreakdown()">Break It Down</button></div>
+                    <div class="loading" id="aiLoading"><div class="spinner"></div><p>AI is thinking...</p></div>
+                </div>
+            </div>
+            <div class="history-section" id="historySection"><h2 class="section-title">📋 Recent Tasks</h2><div id="historyList"></div></div>
+        </div>
+    </div>
+    <div class="celebration" id="celebration"><div class="celebration-emoji">🎉</div><div class="celebration-text">Task Complete!</div><div class="celebration-sub">You're crushing it! Keep up the great work!</div><button class="btn btn-mint" style="width: auto; padding: 16px 40px;" onclick="closeCelebration()">Continue</button></div>
+    <script>
+        let token = localStorage.getItem('quickclean_token');
+        let user = null;
+        let currentTask = null;
+        let timerInterval = null;
+        let timeRemaining = 0;
+        document.addEventListener('DOMContentLoaded', () => { if (token) checkAuth(); });
+        async function checkAuth() { try { const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { user = await res.json(); showDashboard(); } else logout(); } catch (e) { logout(); } }
+        function showDashboard() { document.getElementById('authScreen').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; document.getElementById('userName').textContent = 'Hi, ' + user.name + '!'; loadHistory(); }
+        function showTab(tab) { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); event.target.classList.add('active'); document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none'; document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none'; }
+        function showError(msg) { const el = document.getElementById('authError'); el.textContent = msg; el.style.display = 'block'; }
+        async function handleLogin(e) { e.preventDefault(); try { const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value }) }); const data = await res.json(); if (res.ok) { token = data.token; user = data.user; localStorage.setItem('quickclean_token', token); showDashboard(); } else showError(data.error); } catch (e) { showError('Connection error'); } }
+        async function handleRegister(e) { e.preventDefault(); try { const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('regName').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPassword').value }) }); const data = await res.json(); if (res.ok) { token = data.token; user = data.user; localStorage.setItem('quickclean_token', token); showDashboard(); } else showError(data.error); } catch (e) { showError('Connection error'); } }
+        function logout() { token = null; user = null; localStorage.removeItem('quickclean_token'); document.getElementById('authScreen').style.display = 'flex'; document.getElementById('dashboard').style.display = 'none'; }
+        async function startTemplate(id) { try { const res = await fetch('/api/templates/' + id); const template = await res.json(); startTask(template); } catch (e) { alert('Failed to load template'); } }
+        async function aiBreakdown() { const input = document.getElementById('aiTaskInput').value.trim(); if (!input) return alert('Enter a task first!'); document.getElementById('aiLoading').style.display = 'block'; try { const res = await fetch('/api/ai/breakdown', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: input, timeLimit: 5 }) }); const data = await res.json(); document.getElementById('aiLoading').style.display = 'none'; if (res.ok) { startTask(data); document.getElementById('aiTaskInput').value = ''; } else alert(data.error || 'AI failed'); } catch (e) { document.getElementById('aiLoading').style.display = 'none'; alert('AI request failed'); } }
+        function startTask(task) { currentTask = { ...task, steps: task.steps.map(s => ({ ...s, completed: false })) }; document.getElementById('taskTitle').textContent = task.title; document.getElementById('templatesSection').style.display = 'none'; document.getElementById('historySection').style.display = 'none'; document.getElementById('activeTask').style.display = 'block'; renderSteps(); startTimer(task.steps.reduce((sum, s) => sum + (s.timeMinutes || 1), 0) * 60); }
+        function renderSteps() { const list = document.getElementById('stepsList'); const completed = currentTask.steps.filter(s => s.completed).length; const total = currentTask.steps.length; document.getElementById('progressFill').style.width = (completed / total * 100) + '%'; document.getElementById('progressText').textContent = completed + ' of ' + total + ' steps done'; list.innerHTML = currentTask.steps.map((step, i) => `<div class="step-item ${step.completed ? 'completed' : ''}" onclick="toggleStep(${i})"><div class="step-checkbox">${step.completed ? '✓' : ''}</div><div class="step-text">${step.text}</div><div class="step-time">${step.timeMinutes || 1} min</div></div>`).join(''); if (completed === total) completeTask(); }
+        function toggleStep(index) { currentTask.steps[index].completed = !currentTask.steps[index].completed; renderSteps(); }
+        function startTimer(seconds) { timeRemaining = seconds; updateTimerDisplay(); timerInterval = setInterval(() => { timeRemaining--; updateTimerDisplay(); if (timeRemaining <= 0) clearInterval(timerInterval); }, 1000); }
+        function updateTimerDisplay() { const mins = Math.floor(timeRemaining / 60); const secs = timeRemaining % 60; document.getElementById('taskTimer').textContent = mins + ':' + secs.toString().padStart(2, '0'); }
+        function cancelTask() { clearInterval(timerInterval); currentTask = null; document.getElementById('activeTask').style.display = 'none'; document.getElementById('templatesSection').style.display = 'block'; document.getElementById('historySection').style.display = 'block'; }
+        async function completeTask() { clearInterval(timerInterval); try { await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ title: currentTask.title, category: 'completed', steps: currentTask.steps }) }); } catch (e) {} document.getElementById('celebration').classList.add('show'); }
+        function closeCelebration() { document.getElementById('celebration').classList.remove('show'); cancelTask(); loadHistory(); }
+        async function loadHistory() { try { const res = await fetch('/api/tasks', { headers: { 'Authorization': 'Bearer ' + token } }); const tasks = await res.json(); const list = document.getElementById('historyList'); if (tasks.length === 0) { list.innerHTML = '<p style="color: var(--gray); text-align: center;">No tasks yet. Start your first one above!</p>'; return; } list.innerHTML = tasks.slice(0, 10).map(t => `<div class="history-item completed"><div><div class="history-title">${t.title}</div><div class="history-meta">${new Date(t.createdAt).toLocaleDateString()} • ${t.steps.length} steps</div></div><div class="history-badge">✓ Done</div></div>`).join(''); } catch (e) {} }
+    </script>
+</body>
+</html>
